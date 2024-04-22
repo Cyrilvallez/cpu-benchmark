@@ -108,8 +108,8 @@ def multiprocessing_fibonacci(function_call: int):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='CPU Benchmark')
-    parser.add_argument('output_file', type=str, required=True, help='Output filename.')
-    parser.add_argument('--no_latex', action='store_false', help='Output filename.')
+    parser.add_argument('output_file', type=str, help='Output filename.')
+    parser.add_argument('--no_latex', action='store_false', help='If given, will not print latex table output.')
     
     args = parser.parse_args()
     output_file = args.output_file
