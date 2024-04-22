@@ -1,7 +1,7 @@
 import time
 import random
-import math
-from concurrent.futures import ProcessPoolExecutor
+import argparse
+from tqdm import tqdm
 import multiprocessing as mp
 
 import numpy as np
@@ -22,7 +22,7 @@ def timeit(N_repeat: int = 10, label: str | None = None):
 
             # Executes the function N_repeat times
             times = []
-            for _ in range(N_repeat):
+            for _ in tqdm(range(N_repeat), leave=False):
                 t0 = time.time()
                 result = decorated_function(*args, **kwargs)
                 t1 = time.time()
@@ -42,8 +42,8 @@ def timeit(N_repeat: int = 10, label: str | None = None):
                 label = decorated_function.__name__
 
             # Print stats
-            print(f'{label} with size {args[0]}:')
-            print('    ' + ' | '.join(f'{k}: {v:.2e}' for k, v in timings.items()))
+            # print(f'{label} with size {args[0]}:')
+            # print('    ' + ' | '.join(f'{k}: {v:.2e}' for k, v in timings.items()))
 
             results = {
                 'label': label,
@@ -107,27 +107,34 @@ def multiprocessing_fibonacci(function_call: int):
 
 if __name__ == '__main__':
 
-    DIMS = (500, 1000, 2000, 5000)
-    # DIMS = (500, 1000)
+    parser = argparse.ArgumentParser(description='CPU Benchmark')
+    parser.add_argument('output_file', type=str, required=True, help='Output filename.')
+    parser.add_argument('--no_latex', action='store_false', help='Output filename.')
+    
+    args = parser.parse_args()
+    output_file = args.output_file
+    output_file = output_file if output_file.endswith('.csv') else output_file + '.csv'
+    latex = args.no_latex
 
-    for dim in DIMS:
+    for dim in tqdm((500, 1000, 2000, 5000, 10000)):
         numpy_matrix_multiplication(dim)
 
-    for dim in DIMS:
+    for dim in tqdm((500, 1000, 2000, 5000, 10000)):
         numpy_matrix_inversion(dim)
 
-    for dim in DIMS:
+    for dim in tqdm((500, 1000, 2000, 5000, 8000)):
         scipy_pairwise_euclidean_distance(dim)
 
-    for dim in (5000, 10000, 20000, 30000):
-    # for dim in (100, 500):
+    for dim in tqdm((30000, 70000, 150000, 300000)):
         numpy_linear_fit(dim)
 
-    for dim in (50, 100, 200, 300):
+    for dim in tqdm((100, 200, 300, 500, 1500)):
         multiprocessing_fibonacci(dim)
 
 
     grouped = TIMING_DF.set_index(['label', 'size'])
-    # print(grouped)
-    print(grouped.to_string(index_names=False, col_space=6, justify='center', float_format=lambda x: f'{x:.2e}'))
-    print(grouped.to_latex(index_names=False, column_format='lccccc', escape=True, float_format=lambda x: f'{x:.2e}'))
+    grouped.to_csv(output_file)
+    print(grouped.to_string(index_names=False, justify='center', float_format=lambda x: f'{x:.2e}'))
+    if latex:
+        print('\n\n')
+        print(grouped.to_latex(index_names=False, column_format='lccccc', escape=True, float_format=lambda x: f'{x:.2e}'))
