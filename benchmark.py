@@ -2,6 +2,7 @@ import time
 import random
 
 import numpy as np
+from scipy.spatial.distance import pdist
 
 # Set the random seeds
 random.seed(0)
@@ -43,8 +44,22 @@ def matrix_multiplication(dim: int):
     return a@b
 
 
+@timeit(N)
+def pairwise_euclidean_distance(dim: int):
+
+    X = np.random.rand(dim, 2048)
+
+    return pdist(X, metric='euclidean')
+
+
+
 if __name__ == '__main__':
 
     for dim in (500, 1000, 2000, 5000):
         print(f'Matrix multiplication with dimension {dim}:')
         matrix_multiplication(dim)
+
+
+    for dim in (500, 1000, 2000, 5000):
+        print(f'Pairwise euclidean distance with dimension {dim}:')
+        pairwise_euclidean_distance(dim)
